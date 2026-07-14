@@ -6,7 +6,7 @@
 @push('structured-data')
 <script type="application/ld+json">
 {!! json_encode([
-    '@context' => 'https://schema.org',
+    '@@context' => 'https://schema.org',
     '@type' => 'WebSite',
     'name' => 'ゴルフ場口コミ検索',
     'url' => url('/'),

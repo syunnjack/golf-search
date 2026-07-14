@@ -6,7 +6,7 @@
 @push('structured-data')
 <script type="application/ld+json">
 {!! json_encode([
-    '@context' => 'https://schema.org',
+    '@@context' => 'https://schema.org',
     '@type' => 'BreadcrumbList',
     'itemListElement' => [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'ゴルフ場口コミ検索', 'item' => url('/')],
@@ -17,7 +17,7 @@
 @if (!empty($faq))
 <script type="application/ld+json">
 {!! json_encode([
-    '@context' => 'https://schema.org',
+    '@@context' => 'https://schema.org',
     '@type' => 'FAQPage',
     'mainEntity' => collect($faq)->map(fn ($qa) => [
         '@type' => 'Question',
@@ -33,7 +33,7 @@
 @if (!empty($results))
 <script type="application/ld+json">
 {!! json_encode([
-    '@context' => 'https://schema.org',
+    '@@context' => 'https://schema.org',
     '@type' => 'ItemList',
     'name' => $prefecture . 'のゴルフ場一覧',
     'itemListElement' => collect($results)->values()->map(function ($item, $i) use ($reviews) {
