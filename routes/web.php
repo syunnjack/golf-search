@@ -2,10 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GolfController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SitemapController;
 
-
-// トップページ (都道府県選択)
 Route::get('/', [GolfController::class, 'index'])->name('golf.index');
-
-// ゴルフ場検索 (都道府県選択後)
 Route::get('/search', [GolfController::class, 'search'])->name('golf.search');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::view('/about', 'about')->name('about');
+
+Route::post('/reviews', [ReviewController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('reviews.store');
