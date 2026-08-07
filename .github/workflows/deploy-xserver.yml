@@ -43,13 +43,6 @@ jobs:
           CACHE_STORE=file
           SESSION_DRIVER=file
           QUEUE_CONNECTION=sync
-          DMM_API_ID=${{ secrets.DMM_API_ID }}
-          DMM_AFFILIATE_ID=${{ secrets.DMM_AFFILIATE_ID }}
-          DUGA_APP_ID=${{ secrets.DUGA_APP_ID }}
-          DUGA_AGENT_ID=${{ secrets.DUGA_AGENT_ID }}
-          SOKMIL_API_KEY=${{ secrets.SOKMIL_API_KEY }}
-          SOKMIL_AFFILIATE_ID=${{ secrets.SOKMIL_AFFILIATE_ID }}
-          GA4_MEASUREMENT_ID=${{ secrets.GA4_MEASUREMENT_ID }}
           EOF
 
       - name: Deploy files via rsync over SSH
@@ -58,18 +51,18 @@ jobs:
           switches: -avzr --delete --exclude=".git" --exclude=".github" --exclude="node_modules" --exclude="tests" --exclude="database/database.sqlite" --exclude="storage/app" --exclude="storage/logs" --exclude="storage/framework"
           path: ./
           remote_path: ${{ secrets.XSERVER_DEPLOY_PATH }}
-          remote_host: ${{ secrets.XSERVER_SSH_HOST }}
-          remote_port: ${{ secrets.XSERVER_SSH_PORT }}
-          remote_user: ${{ secrets.XSERVER_SSH_USER }}
-          remote_key: ${{ secrets.XSERVER_SSH_KEY }}
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_port: '10022'
+          remote_user: ${{ secrets.SSH_USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run migrations, cache config, sync content
+      - name: Run migrations, cache config
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.XSERVER_SSH_HOST }}
-          port: ${{ secrets.XSERVER_SSH_PORT }}
-          username: ${{ secrets.XSERVER_SSH_USER }}
-          key: ${{ secrets.XSERVER_SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          port: 10022
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
             cd "${{ secrets.XSERVER_DEPLOY_PATH }}"
@@ -80,5 +73,3 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            echo 'no sync command for this app'
-            echo 'no cron needed'
