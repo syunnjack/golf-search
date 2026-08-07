@@ -56,25 +56,6 @@ jobs:
           remote_user: ${{ secrets.SSH_USERNAME }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: DEBUG - probe available PHP binaries
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: 10022
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "--- which -a php* ---"
-            which -a php php8.2 php8.3 php8.4 2>/dev/null || true
-            echo "--- /opt/cpanel ea-php ---"
-            ls -d /opt/cpanel/ea-php*/root/usr/bin/php 2>/dev/null || true
-            echo "--- /usr/local/bin ---"
-            ls /usr/local/bin/php* 2>/dev/null || true
-            echo "--- CloudLinux alt-php ---"
-            ls -d /opt/alt/php*/usr/bin/php 2>/dev/null || true
-            echo "--- php -v (default) ---"
-            php -v 2>&1 || true
-
       - name: Run migrations, cache config
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -88,7 +69,7 @@ jobs:
             mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views storage/logs storage/app
             touch database/database.sqlite
             chmod -R 775 storage database
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+            /usr/bin/php8.3 artisan migrate --force
+            /usr/bin/php8.3 artisan config:cache
+            /usr/bin/php8.3 artisan route:cache
+            /usr/bin/php8.3 artisan view:cache
