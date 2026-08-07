@@ -56,6 +56,25 @@ jobs:
           remote_user: ${{ secrets.SSH_USERNAME }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: DEBUG - probe available PHP binaries
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: 10022
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "--- which -a php* ---"
+            which -a php php8.2 php8.3 php8.4 2>/dev/null || true
+            echo "--- /opt/cpanel ea-php ---"
+            ls -d /opt/cpanel/ea-php*/root/usr/bin/php 2>/dev/null || true
+            echo "--- /usr/local/bin ---"
+            ls /usr/local/bin/php* 2>/dev/null || true
+            echo "--- CloudLinux alt-php ---"
+            ls -d /opt/alt/php*/usr/bin/php 2>/dev/null || true
+            echo "--- php -v (default) ---"
+            php -v 2>&1 || true
+
       - name: Run migrations, cache config
         uses: appleboy/ssh-action@v1.0.3
         with:
