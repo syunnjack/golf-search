@@ -43,6 +43,7 @@ jobs:
           CACHE_STORE=file
           SESSION_DRIVER=file
           QUEUE_CONNECTION=sync
+          GA4_MEASUREMENT_ID=${{ vars.GA4_MEASUREMENT_ID }}
           EOF
 
       - name: Deploy files via rsync over SSH
