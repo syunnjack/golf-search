@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Http;
  * tee time ("前泊"). Uses openapi.rakuten.co.jp/engine (not
  * app.rakuten.co.jp/services) with accessKey — the same endpoint shape
  * required by the GORA API for this application's credentials.
+ *
+ * The API version moved from /20170426/ to /20260731/ in Rakuten's May
+ * 2026 platform migration; the old version now silently returns a 503
+ * "Authentication service error" instead of hotel data (caught below
+ * and treated as "no hotels", which is why this stopped showing
+ * results without throwing a visible error).
  */
 class RakutenTravel
 {
@@ -33,7 +39,7 @@ class RakutenTravel
                         'Referer' => config('app.url'),
                         'Origin' => config('app.url'),
                     ])
-                    ->get('https://openapi.rakuten.co.jp/engine/api/Travel/KeywordHotelSearch/20170426', [
+                    ->get('https://openapi.rakuten.co.jp/engine/api/Travel/KeywordHotelSearch/20260731', [
                         'format' => 'json',
                         'applicationId' => $appId,
                         'accessKey' => $accessKey,
