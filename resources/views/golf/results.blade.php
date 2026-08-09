@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', ($tag ? $tag . '｜' : '') . $prefecture . 'のゴルフ場一覧 | ゴルフ場口コミ検索')
-@section('description', $prefecture . 'にあるゴルフ場の一覧です。コース名・住所・写真・予約リンク・実際にプレーした人の口コミをまとめて確認できます。')
+@section('description', $prefecture . 'にあるゴルフ場の一覧です。コース名・住所・写真・予約リンク・実際にプレーした人の口コミに加え、気象庁の天気予報もまとめて確認できます。')
 
 @push('structured-data')
 <script type="application/ld+json">
@@ -76,6 +76,21 @@
   </nav>
 
   <h1>{{ $prefecture }}のゴルフ場一覧</h1>
+
+  @if(!empty($weather))
+    <section class="mb-4 p-3 border rounded bg-light" aria-label="{{ $prefecture }}の天気予報">
+      <h2 class="h6 mb-2">{{ $prefecture }}の天気予報</h2>
+      <div class="d-flex flex-wrap gap-3">
+        @foreach($weather as $day)
+          <div class="small {{ $day['hasRain'] ? 'text-danger' : '' }}">
+            <div class="fw-bold">{{ $day['date'] }}</div>
+            <div>{{ $day['weather'] }}</div>
+          </div>
+        @endforeach
+      </div>
+      <p class="text-muted small mb-0 mt-2">出典: <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">気象庁 天気予報</a></p>
+    </section>
+  @endif
 
   @if(!empty($availableTags))
     <div class="mb-3">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Review;
 use App\Support\GolfTagger;
+use App\Support\JmaWeather;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -93,12 +94,13 @@ class GolfController extends Controller
             ->get()
             ->groupBy('course_id');
 
-        $faq = $this->buildFaq($prefecture, $reviews, $tagsByCourseId);
+        $weather = JmaWeather::forecast($prefecture);
+        $faq = $this->buildFaq($prefecture, $reviews, $tagsByCourseId, $weather);
 
-        return view('golf.results', compact('results', 'prefecture', 'reviews', 'tagsByCourseId', 'availableTags', 'tag', 'faq'));
+        return view('golf.results', compact('results', 'prefecture', 'reviews', 'tagsByCourseId', 'availableTags', 'tag', 'faq', 'weather'));
     }
 
-    private function buildFaq(string $prefecture, Collection $reviews, array $tagsByCourseId): array
+    private function buildFaq(string $prefecture, Collection $reviews, array $tagsByCourseId, ?array $weather): array
     {
         $morningCount = collect($tagsByCourseId)->filter(fn ($tags) => in_array('早朝プレー', $tags, true))->count();
 
@@ -124,6 +126,17 @@ class GolfController extends Controller
             $faq[] = [
                 'question' => $prefecture . 'でおすすめのゴルフ場は？',
                 'answer' => "口コミ評価をもとにすると、{$topRatedName}が現在最も高い評価を得ています。ただしコースの好みは人それぞれのため、他のゴルフ場の口コミもあわせてご確認ください。",
+            ];
+        }
+
+        if ($weather) {
+            $rainyDays = collect($weather)->where('hasRain', true)->pluck('date');
+            $answer = $rainyDays->isEmpty()
+                ? "気象庁の予報によると、当面{$prefecture}で雨マークは出ていません。プレー予定を立てやすい状況です。"
+                : "気象庁の予報によると、{$rainyDays->implode('、')}に雨または雷の可能性があります。詳しい時間帯の予報は各予報日の内容をご確認ください。";
+            $faq[] = [
+                'question' => $prefecture . 'でゴルフをするのに天気は大丈夫ですか？',
+                'answer' => $answer,
             ];
         }
 

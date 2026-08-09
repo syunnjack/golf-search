@@ -43,6 +43,10 @@ jobs:
           CACHE_STORE=file
           SESSION_DRIVER=file
           QUEUE_CONNECTION=sync
+          GA4_MEASUREMENT_ID=G-GBWW84KBWJ
+          RAKUTEN_APP_ID=${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY=${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_AFFILIATE_ID=${{ secrets.RAKUTEN_AFFILIATE_ID }}
           EOF
 
       - name: Deploy files via rsync over SSH
