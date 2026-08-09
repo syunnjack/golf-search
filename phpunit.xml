@@ -27,6 +27,9 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="RAKUTEN_APP_ID" value="test-app-id"/>
+        <env name="RAKUTEN_ACCESS_KEY" value="test-access-key"/>
+        <env name="RAKUTEN_AFFILIATE_ID" value="test-affiliate-id"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>

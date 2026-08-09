@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Review;
 use App\Support\GolfTagger;
 use App\Support\JmaWeather;
+use App\Support\RakutenTravel;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -95,12 +96,13 @@ class GolfController extends Controller
             ->groupBy('course_id');
 
         $weather = JmaWeather::forecast($prefecture);
-        $faq = $this->buildFaq($prefecture, $reviews, $tagsByCourseId, $weather);
+        $hotels = RakutenTravel::hotelsNear($prefecture);
+        $faq = $this->buildFaq($prefecture, $reviews, $tagsByCourseId, $weather, $hotels);
 
-        return view('golf.results', compact('results', 'prefecture', 'reviews', 'tagsByCourseId', 'availableTags', 'tag', 'faq', 'weather'));
+        return view('golf.results', compact('results', 'prefecture', 'reviews', 'tagsByCourseId', 'availableTags', 'tag', 'faq', 'weather', 'hotels'));
     }
 
-    private function buildFaq(string $prefecture, Collection $reviews, array $tagsByCourseId, ?array $weather): array
+    private function buildFaq(string $prefecture, Collection $reviews, array $tagsByCourseId, ?array $weather, array $hotels): array
     {
         $morningCount = collect($tagsByCourseId)->filter(fn ($tags) => in_array('早朝プレー', $tags, true))->count();
 
@@ -137,6 +139,13 @@ class GolfController extends Controller
             $faq[] = [
                 'question' => $prefecture . 'でゴルフをするのに天気は大丈夫ですか？',
                 'answer' => $answer,
+            ];
+        }
+
+        if (! empty($hotels)) {
+            $faq[] = [
+                'question' => $prefecture . 'のゴルフ場に前泊する場合、近くにホテルはありますか？',
+                'answer' => "早朝スタートに備えて前泊したい方向けに、{$prefecture}周辺のホテルを一覧に掲載しています。早朝プレーのゴルフ場と合わせてご確認ください。",
             ];
         }
 

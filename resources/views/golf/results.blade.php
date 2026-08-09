@@ -92,6 +92,29 @@
     </section>
   @endif
 
+  @if(!empty($hotels))
+    <section class="mb-4 p-3 border rounded bg-light" aria-label="{{ $prefecture }}の前泊ホテル">
+      <h2 class="h6 mb-2">早朝スタートの前泊に。{{ $prefecture }}周辺のホテル</h2>
+      <div class="d-flex flex-wrap gap-3">
+        @foreach($hotels as $hotel)
+          <a href="{{ $hotel['url'] }}" target="_blank" rel="noopener noreferrer sponsored" class="text-decoration-none text-dark" style="width: 140px;">
+            @if(!empty($hotel['thumbnailUrl']))
+              <img src="{{ $hotel['thumbnailUrl'] }}" alt="{{ $hotel['name'] }}" width="140" loading="lazy" class="rounded">
+            @endif
+            <div class="small fw-bold mt-1">{{ $hotel['name'] }}</div>
+            @if(!empty($hotel['minCharge']))
+              <div class="small text-muted">{{ number_format($hotel['minCharge']) }}円〜</div>
+            @endif
+            @if(!empty($hotel['reviewAverage']))
+              <div class="small text-muted">★{{ $hotel['reviewAverage'] }}</div>
+            @endif
+          </a>
+        @endforeach
+      </div>
+      <p class="text-muted small mb-0 mt-2">提供: 楽天トラベル</p>
+    </section>
+  @endif
+
   @if(!empty($availableTags))
     <div class="mb-3">
       <span class="small text-muted">目的で絞り込む:</span>

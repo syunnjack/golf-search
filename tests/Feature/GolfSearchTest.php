@@ -90,6 +90,38 @@ class GolfSearchTest extends TestCase
         $response->assertSee('見つかりませんでした');
     }
 
+    public function test_search_shows_nearby_hotels_for_pre_stay(): void
+    {
+        Http::fake([
+            'openapi.rakuten.co.jp/engine/api/Gora/*' => Http::response([
+                'Items' => [
+                    ['golfCourseId' => 1, 'golfCourseName' => '千葉県のコース', 'address' => '千葉県千葉市1-1-1'],
+                ],
+            ], 200),
+            'openapi.rakuten.co.jp/engine/api/Travel/*' => Http::response([
+                'hotels' => [
+                    [
+                        'hotel' => [
+                            [
+                                'hotelBasicInfo' => [
+                                    'hotelName' => 'テストホテル千葉',
+                                    'hotelInformationUrl' => 'https://example.com/hotel/1',
+                                    'hotelMinCharge' => 5000,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->get('/search?prefecture=' . urlencode('千葉県'));
+
+        $response->assertStatus(200);
+        $response->assertSee('テストホテル千葉');
+        $response->assertSee('前泊');
+    }
+
     public function test_tag_filter_narrows_results_to_matching_courses(): void
     {
         Http::fake([
