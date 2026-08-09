@@ -30,7 +30,7 @@ class GolfSearchTest extends TestCase
     {
         Http::fake([
             'openapi.rakuten.co.jp/*' => Http::response([
-                'items' => [
+                'Items' => [
                     [
                         'golfCourseId' => 1,
                         'golfCourseName' => 'テストゴルフ倶楽部',
@@ -52,7 +52,7 @@ class GolfSearchTest extends TestCase
     {
         Http::fake([
             'openapi.rakuten.co.jp/*' => Http::response([
-                'items' => [
+                'Items' => [
                     ['golfCourseId' => 1, 'golfCourseName' => '千葉県のコース', 'address' => '千葉県千葉市1-1-1'],
                     ['golfCourseId' => 2, 'golfCourseName' => '埼玉県のコース', 'address' => '埼玉県さいたま市1-1-1'],
                 ],
@@ -69,7 +69,7 @@ class GolfSearchTest extends TestCase
     public function test_search_shows_empty_message_when_no_courses_found(): void
     {
         Http::fake([
-            'openapi.rakuten.co.jp/*' => Http::response(['items' => []], 200),
+            'openapi.rakuten.co.jp/*' => Http::response(['Items' => []], 200),
         ]);
 
         $response = $this->get('/search?prefecture=' . urlencode('沖縄県'));
@@ -94,7 +94,7 @@ class GolfSearchTest extends TestCase
     {
         Http::fake([
             'openapi.rakuten.co.jp/*' => Http::response([
-                'items' => [
+                'Items' => [
                     ['golfCourseId' => 1, 'golfCourseName' => '早朝プレー可能なコース', 'address' => '大阪府大阪市1-1-1'],
                     ['golfCourseId' => 2, 'golfCourseName' => 'ふつうのコース', 'address' => '大阪府大阪市2-2-2'],
                 ],

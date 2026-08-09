@@ -56,7 +56,7 @@ class GolfController extends Controller
                 return [];
             }
 
-            $items = $response->successful() ? ($response->json('items') ?? []) : [];
+            $items = $response->successful() ? ($response->json('Items') ?? []) : [];
 
             // keyword検索はあいまい一致のため、選択された都道府県以外の
             // ゴルフ場も混ざる。住所に都道府県名が含まれるかで厳密に絞り込む。
