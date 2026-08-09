@@ -46,9 +46,9 @@ class GolfController extends Controller
                     ->get('https://openapi.rakuten.co.jp/engine/api/Gora/GoraGolfCourseSearch/20170623', [
                         'format' => 'json',
                         'formatVersion' => 2,
-                        'applicationId' => env('RAKUTEN_APP_ID'),
-                        'accessKey' => env('RAKUTEN_ACCESS_KEY'),
-                        'affiliateId' => env('RAKUTEN_AFFILIATE_ID'),
+                        'applicationId' => config('services.rakuten.app_id'),
+                        'accessKey' => config('services.rakuten.access_key'),
+                        'affiliateId' => config('services.rakuten.affiliate_id'),
                         'keyword' => $prefecture . ' ゴルフ場',
                         'hits' => 30,
                     ]);

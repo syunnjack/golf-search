@@ -40,4 +40,10 @@ return [
         'id' => env('GA4_MEASUREMENT_ID'),
     ],
 
+    'rakuten' => [
+        'app_id' => env('RAKUTEN_APP_ID'),
+        'access_key' => env('RAKUTEN_ACCESS_KEY'),
+        'affiliate_id' => env('RAKUTEN_AFFILIATE_ID'),
+    ],
+
 ];
