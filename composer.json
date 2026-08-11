@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "syunnjack/golf-search",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "全国47都道府県のゴルフ場を口コミ・タグ・前泊ホテル情報付きで探せるLaravelアプリケーション。",
+    "keywords": ["laravel", "golf", "rakuten", "nationwide"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
