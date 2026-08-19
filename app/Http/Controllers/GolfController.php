@@ -14,6 +14,22 @@ use Illuminate\Support\Facades\Http;
 
 class GolfController extends Controller
 {
+    /** 都道府県ページのURLに使うローマ字。クエリ付きURLより共有・被リンクされやすい。 */
+    public const PREFECTURE_SLUGS = [
+        '北海道' => 'hokkaido', '青森県' => 'aomori', '岩手県' => 'iwate', '宮城県' => 'miyagi',
+        '秋田県' => 'akita', '山形県' => 'yamagata', '福島県' => 'fukushima', '茨城県' => 'ibaraki',
+        '栃木県' => 'tochigi', '群馬県' => 'gunma', '埼玉県' => 'saitama', '千葉県' => 'chiba',
+        '東京都' => 'tokyo', '神奈川県' => 'kanagawa', '新潟県' => 'niigata', '富山県' => 'toyama',
+        '石川県' => 'ishikawa', '福井県' => 'fukui', '山梨県' => 'yamanashi', '長野県' => 'nagano',
+        '岐阜県' => 'gifu', '静岡県' => 'shizuoka', '愛知県' => 'aichi', '三重県' => 'mie',
+        '滋賀県' => 'shiga', '京都府' => 'kyoto', '大阪府' => 'osaka', '兵庫県' => 'hyogo',
+        '奈良県' => 'nara', '和歌山県' => 'wakayama', '鳥取県' => 'tottori', '島根県' => 'shimane',
+        '岡山県' => 'okayama', '広島県' => 'hiroshima', '山口県' => 'yamaguchi', '徳島県' => 'tokushima',
+        '香川県' => 'kagawa', '愛媛県' => 'ehime', '高知県' => 'kochi', '福岡県' => 'fukuoka',
+        '佐賀県' => 'saga', '長崎県' => 'nagasaki', '熊本県' => 'kumamoto', '大分県' => 'oita',
+        '宮崎県' => 'miyazaki', '鹿児島県' => 'kagoshima', '沖縄県' => 'okinawa',
+    ];
+
     private const PREFECTURES = [
         '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
         '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
@@ -29,12 +45,30 @@ class GolfController extends Controller
         return view('golf.index', ['prefectures' => self::PREFECTURES]);
     }
 
+    /** トップの検索フォームからの遷移。都道府県ページの正しいURLへ送る。 */
     public function search(Request $request)
     {
-        $prefecture = $request->input('prefecture', '');
+        $prefecture = (string) $request->input('prefecture', '');
+        $slug = self::PREFECTURE_SLUGS[$prefecture] ?? null;
 
-        if ($prefecture === '') {
+        if ($slug === null) {
             return redirect()->route('golf.index');
+        }
+
+        $tag = (string) $request->input('tag', '');
+
+        return redirect()->route('golf.prefecture', array_filter([
+            'prefectureSlug' => $slug,
+            'tag' => $tag !== '' ? $tag : null,
+        ]), 301);
+    }
+
+    public function prefecture(Request $request, string $prefectureSlug)
+    {
+        $prefecture = array_search($prefectureSlug, self::PREFECTURE_SLUGS, true);
+
+        if ($prefecture === false) {
+            abort(404);
         }
 
         $results = Cache::remember("golf-search:{$prefecture}", now()->addHour(), function () use ($prefecture) {
@@ -99,7 +133,10 @@ class GolfController extends Controller
         $hotels = RakutenTravel::hotelsNear($prefecture);
         $faq = $this->buildFaq($prefecture, $reviews, $tagsByCourseId, $weather, $hotels);
 
-        return view('golf.results', compact('results', 'prefecture', 'reviews', 'tagsByCourseId', 'availableTags', 'tag', 'faq', 'weather', 'hotels'));
+        return view('golf.results', compact(
+            'results', 'prefecture', 'prefectureSlug', 'reviews', 'tagsByCourseId',
+            'availableTags', 'tag', 'faq', 'weather', 'hotels'
+        ));
     }
 
     private function buildFaq(string $prefecture, Collection $reviews, array $tagsByCourseId, ?array $weather, array $hotels): array

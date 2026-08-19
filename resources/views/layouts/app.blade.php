@@ -6,13 +6,20 @@
 
     <title>@yield('title', 'ゴルフ場口コミ検索 | 都道府県からゴルフ場を探す')</title>
     <meta name="description" content="@yield('description', '全国47都道府県からゴルフ場を検索できるゴルフ場情報サイトです。行きたい都道府県を選ぶだけで、楽天GORAの最新のゴルフ場情報を一覧表示します。')">
-    <link rel="canonical" href="{{ url()->current() }}">
+    @php
+        // url()->current() はクエリを落とすため、目的タグで絞り込んだページが
+        // すべて絞り込み前のURLを正規URLとして申告してしまう。
+        // 内容が変わる条件（tag）だけを canonical に残す。
+        $canonicalQuery = array_filter(request()->only(['tag']), fn ($value) => $value !== null && $value !== '');
+        $canonicalUrl = url()->current() . ($canonicalQuery ? '?' . http_build_query($canonicalQuery) : '');
+    @endphp
+    <link rel="canonical" href="{{ $canonicalUrl }}">
 
     <meta property="og:site_name" content="ゴルフ場口コミ検索">
     <meta property="og:type" content="website">
     <meta property="og:title" content="@yield('title', 'ゴルフ場口コミ検索 | 都道府県からゴルフ場を探す')">
     <meta property="og:description" content="@yield('description', '全国47都道府県からゴルフ場を検索できるゴルフ場情報サイトです。行きたい都道府県を選ぶだけで、楽天GORAの最新のゴルフ場情報を一覧表示します。')">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
     <meta property="og:locale" content="ja_JP">
 
     <meta name="twitter:card" content="summary">

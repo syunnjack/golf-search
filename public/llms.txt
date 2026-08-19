@@ -5,8 +5,8 @@
 ## サイト構成
 
 - トップページ（都道府県一覧）: /
-- 都道府県別のゴルフ場検索結果: /search?prefecture={都道府県名}（例: /search?prefecture=北海道）
-- 目的タグでの絞り込み: /search?prefecture={都道府県名}&tag={タグ名}（例: /search?prefecture=千葉県&tag=早朝プレー）
+- 都道府県別のゴルフ場一覧: /golf/{都道府県のローマ字}（例: /golf/hokkaido）
+- 目的タグでの絞り込み: /golf/{都道府県のローマ字}?tag={タグ名}（例: /golf/chiba?tag=早朝プレー）
 - このサイトについて（運営方針・データ出典・口コミポリシー）: /about
 - サイトマップ: /sitemap.xml
 

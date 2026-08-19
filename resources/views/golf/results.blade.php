@@ -94,7 +94,7 @@
 
   @if(!empty($hotels))
     <section class="mb-4 p-3 border rounded bg-light" aria-label="{{ $prefecture }}の前泊ホテル">
-      <h2 class="h6 mb-2">早朝スタートの前泊に。{{ $prefecture }}周辺のホテル</h2>
+      <h2 class="h6 mb-2">早朝スタートの前泊に。{{ $prefecture }}周辺のホテル<span class="badge bg-secondary ms-2 align-middle">広告</span></h2>
       <div class="d-flex flex-wrap gap-3">
         @foreach($hotels as $hotel)
           <a href="{{ $hotel['url'] }}" target="_blank" rel="noopener noreferrer sponsored" class="text-decoration-none text-dark" style="width: 140px;">
@@ -111,7 +111,10 @@
           </a>
         @endforeach
       </div>
-      <p class="text-muted small mb-0 mt-2">提供: 楽天トラベル</p>
+      <p class="text-muted small mb-0 mt-2">
+        提供: 楽天トラベル。当サイトは楽天アフィリエイトを利用しており、上のリンクから予約されると当サイトに紹介料が入ります。
+        料金・空室状況は変動するため、最新の内容は予約サイトでご確認ください。
+      </p>
     </section>
   @endif
 
@@ -119,11 +122,11 @@
     <div class="mb-3">
       <span class="small text-muted">目的で絞り込む:</span>
       @foreach($availableTags as $t)
-        <a href="{{ route('golf.search', ['prefecture' => $prefecture, 'tag' => $t]) }}"
+        <a href="{{ route('golf.prefecture', ['prefectureSlug' => $prefectureSlug, 'tag' => $t]) }}"
            class="btn btn-sm {{ $tag === $t ? 'btn-primary' : 'btn-outline-secondary' }} me-1 mb-1">{{ $t }}</a>
       @endforeach
       @if($tag !== '')
-        <a href="{{ route('golf.search', ['prefecture' => $prefecture]) }}" class="btn btn-sm btn-link">絞り込み解除</a>
+        <a href="{{ route('golf.prefecture', ['prefectureSlug' => $prefectureSlug]) }}" class="btn btn-sm btn-link">絞り込み解除</a>
       @endif
     </div>
   @endif
@@ -132,14 +135,18 @@
     <p>{{ $prefecture }}のゴルフ場{{ $tag ? "（{$tag}）" : '' }}が見つかりませんでした。他の条件もあわせてご確認ください。</p>
     <a href="{{ route('golf.index') }}" class="btn btn-outline-primary">都道府県一覧に戻る</a>
   @else
-    <p class="text-muted">{{ $prefecture }}にあるゴルフ場 {{ count($results) }}件を掲載しています。</p>
+    <p class="text-muted">
+      {{ $prefecture }}にあるゴルフ場 {{ count($results) }}件を掲載しています。
+      <span class="badge bg-secondary align-middle">広告</span>
+      ゴルフ場名のリンクは楽天GORAの予約ページに移動します。予約されると当サイトに紹介料が入ります。
+    </p>
     @foreach($results as $item)
       @php
         $courseReviews = $reviews->get($item['golfCourseId'] ?? null, collect());
         $courseTags = $tagsByCourseId[$item['golfCourseId'] ?? null] ?? [];
       @endphp
       <article class="mb-4 pb-4 border-bottom">
-        <h2 class="h5"><a href="{{ $item['golfCourseDetailUrl'] ?? '#' }}" target="_blank" rel="noopener noreferrer">{{ $item['golfCourseName'] ?? '' }}</a></h2>
+        <h2 class="h5"><a href="{{ $item['golfCourseDetailUrl'] ?? '#' }}" target="_blank" rel="noopener noreferrer sponsored">{{ $item['golfCourseName'] ?? '' }}</a></h2>
         <address class="mb-2">{{ $item['address'] ?? '' }}</address>
         @if(!empty($courseTags))
           <p class="mb-2">

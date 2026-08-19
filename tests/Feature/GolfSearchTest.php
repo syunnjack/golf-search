@@ -26,6 +26,20 @@ class GolfSearchTest extends TestCase
         $response->assertRedirect(route('golf.index'));
     }
 
+    public function test_search_query_redirects_to_the_prefecture_page(): void
+    {
+        $this->get('/search?prefecture='.urlencode('千葉県'))
+            ->assertRedirect(route('golf.prefecture', ['prefectureSlug' => 'chiba']));
+
+        $this->get('/search?prefecture='.urlencode('千葉県').'&tag='.urlencode('早朝プレー'))
+            ->assertRedirect(route('golf.prefecture', ['prefectureSlug' => 'chiba', 'tag' => '早朝プレー']));
+    }
+
+    public function test_unknown_prefecture_slug_returns_not_found(): void
+    {
+        $this->get('/golf/atlantis')->assertNotFound();
+    }
+
     public function test_search_renders_courses_returned_by_rakuten(): void
     {
         Http::fake([
@@ -42,7 +56,7 @@ class GolfSearchTest extends TestCase
             ], 200),
         ]);
 
-        $response = $this->get('/search?prefecture=' . urlencode('千葉県'));
+        $response = $this->get('/golf/chiba');
 
         $response->assertStatus(200);
         $response->assertSee('テストゴルフ倶楽部');
@@ -59,7 +73,7 @@ class GolfSearchTest extends TestCase
             ], 200),
         ]);
 
-        $response = $this->get('/search?prefecture=' . urlencode('千葉県'));
+        $response = $this->get('/golf/chiba');
 
         $response->assertStatus(200);
         $response->assertSee('千葉県のコース');
@@ -72,7 +86,7 @@ class GolfSearchTest extends TestCase
             'openapi.rakuten.co.jp/*' => Http::response(['Items' => []], 200),
         ]);
 
-        $response = $this->get('/search?prefecture=' . urlencode('沖縄県'));
+        $response = $this->get('/golf/okinawa');
 
         $response->assertStatus(200);
         $response->assertSee('見つかりませんでした');
@@ -84,7 +98,7 @@ class GolfSearchTest extends TestCase
             'openapi.rakuten.co.jp/*' => Http::response(null, 500),
         ]);
 
-        $response = $this->get('/search?prefecture=' . urlencode('京都府'));
+        $response = $this->get('/golf/kyoto');
 
         $response->assertStatus(200);
         $response->assertSee('見つかりませんでした');
@@ -115,7 +129,7 @@ class GolfSearchTest extends TestCase
             ], 200),
         ]);
 
-        $response = $this->get('/search?prefecture=' . urlencode('千葉県'));
+        $response = $this->get('/golf/chiba');
 
         $response->assertStatus(200);
         $response->assertSee('テストホテル千葉');
@@ -133,7 +147,7 @@ class GolfSearchTest extends TestCase
             ], 200),
         ]);
 
-        $response = $this->get('/search?prefecture=' . urlencode('大阪府') . '&tag=' . urlencode('早朝プレー'));
+        $response = $this->get('/golf/osaka?tag=' . urlencode('早朝プレー'));
 
         $response->assertStatus(200);
         $response->assertSee('早朝プレー可能なコース');

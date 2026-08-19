@@ -7,6 +7,9 @@ use App\Http\Controllers\SitemapController;
 
 Route::get('/', [GolfController::class, 'index'])->name('golf.index');
 Route::get('/search', [GolfController::class, 'search'])->name('golf.search');
+Route::get('/golf/{prefectureSlug}', [GolfController::class, 'prefecture'])
+    ->whereAlpha('prefectureSlug')
+    ->name('golf.prefecture');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::view('/about', 'about')->name('about');
 

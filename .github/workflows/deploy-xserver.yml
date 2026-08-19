@@ -49,6 +49,17 @@ jobs:
           RAKUTEN_AFFILIATE_ID=${{ secrets.RAKUTEN_AFFILIATE_ID }}
           EOF
 
+      # 配置先が存在しないと rsync がそのまま失敗する（2026年8月まで、この理由で
+      # デプロイが通っていなかった）。先に作ってから送る。
+      - name: Ensure deploy directory exists
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: 10022
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: mkdir -p "${{ secrets.XSERVER_DEPLOY_PATH }}"
+
       - name: Deploy files via rsync over SSH
         uses: burnett01/rsync-deployments@7.0.1
         with:

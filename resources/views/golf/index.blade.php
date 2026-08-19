@@ -27,7 +27,7 @@
   <div class="row row-cols-2 row-cols-md-4 g-2 mt-3">
     @foreach ($prefectures as $pref)
       <div class="col">
-        <a href="{{ route('golf.search', ['prefecture' => $pref]) }}" class="btn btn-outline-primary w-100">
+        <a href="{{ route('golf.prefecture', ['prefectureSlug' => \App\Http\Controllers\GolfController::PREFECTURE_SLUGS[$pref]]) }}" class="btn btn-outline-primary w-100">
           {{ $pref }}
         </a>
       </div>

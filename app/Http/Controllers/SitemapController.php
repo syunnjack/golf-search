@@ -23,10 +23,10 @@ class SitemapController extends Controller
             ['loc' => route('golf.index'), 'priority' => '1.0'],
             ['loc' => route('about'), 'priority' => '0.3'],
         ])->merge(
-            collect(self::PREFECTURES)->map(fn ($pref) => [
-                'loc' => route('golf.search', ['prefecture' => $pref]),
+            collect(GolfController::PREFECTURE_SLUGS)->map(fn (string $slug) => [
+                'loc' => route('golf.prefecture', ['prefectureSlug' => $slug]),
                 'priority' => '0.8',
-            ])
+            ])->values()
         );
 
         return response()
