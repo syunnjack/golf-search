@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Http;
 
 class GolfController extends Controller
 {
+    private const HITS_PER_PAGE = 30;
+    private const MAX_PAGES = 3;
+    private const MAX_COURSES = 60;
+
     /** 都道府県ページのURLに使うローマ字。クエリ付きURLより共有・被リンクされやすい。 */
     public const PREFECTURE_SLUGS = [
         '北海道' => 'hokkaido', '青森県' => 'aomori', '岩手県' => 'iwate', '宮城県' => 'miyagi',
@@ -63,15 +67,26 @@ class GolfController extends Controller
         ]), 301);
     }
 
-    public function prefecture(Request $request, string $prefectureSlug)
+    /**
+     * 楽天GORAから都道府県のゴルフ場を取る。
+     *
+     * keyword検索はあいまい一致なので、県外のコースも混ざる。住所の先頭が
+     * 県名かどうかで絞り込むが、1ページ目が県外で埋まると0件になってしまう。
+     * そのため、結果が続くかぎりページを送って母数を増やす。
+     *
+     * @return array{0: array<int, array<string, mixed>>, 1: bool} 結果と、APIが応答したか
+     */
+    private function fetchCourses(string $prefecture): array
     {
-        $prefecture = array_search($prefectureSlug, self::PREFECTURE_SLUGS, true);
+        $matches = [];
+        $succeeded = false;
 
-        if ($prefecture === false) {
-            abort(404);
-        }
+        for ($page = 1; $page <= self::MAX_PAGES; $page++) {
+            if ($page > 1) {
+                // 楽天ウェブサービスは1秒あたり1リクエストまで
+                usleep(1_100_000);
+            }
 
-        $results = Cache::remember("golf-search:{$prefecture}", now()->addHour(), function () use ($prefecture) {
             try {
                 $response = Http::timeout(5)
                     ->withHeaders([
@@ -85,20 +100,58 @@ class GolfController extends Controller
                         'accessKey' => config('services.rakuten.access_key'),
                         'affiliateId' => config('services.rakuten.affiliate_id'),
                         'keyword' => $prefecture . ' ゴルフ場',
-                        'hits' => 30,
+                        'hits' => self::HITS_PER_PAGE,
+                        'page' => $page,
                     ]);
             } catch (ConnectionException) {
-                return [];
+                break;
             }
 
-            $items = $response->successful() ? ($response->json('Items') ?? []) : [];
+            // 次のページが無いときは404が返る。1ページ目が取れていれば成功扱い。
+            if (! $response->successful()) {
+                break;
+            }
 
-            // keyword検索はあいまい一致のため、選択された都道府県以外の
-            // ゴルフ場も混ざる。住所に都道府県名が含まれるかで厳密に絞り込む。
-            return array_values(array_filter($items, function ($item) use ($prefecture) {
-                return str_starts_with($item['address'] ?? '', $prefecture);
-            }));
-        });
+            $succeeded = true;
+            $items = $response->json('Items') ?? [];
+
+            foreach ($items as $item) {
+                if (str_starts_with($item['address'] ?? '', $prefecture)) {
+                    $key = $item['golfCourseId'] ?? count($matches);
+                    $matches[$key] = $item;
+                }
+            }
+
+            if (count($items) < self::HITS_PER_PAGE || count($matches) >= self::MAX_COURSES) {
+                break;
+            }
+        }
+
+        return [array_values($matches), $succeeded];
+    }
+
+    public function prefecture(Request $request, string $prefectureSlug)
+    {
+        $prefecture = array_search($prefectureSlug, self::PREFECTURE_SLUGS, true);
+
+        if ($prefecture === false) {
+            abort(404);
+        }
+
+        $cacheKey = "golf-search:{$prefecture}";
+        $results = Cache::get($cacheKey);
+
+        if ($results === null) {
+            [$results, $succeeded] = $this->fetchCourses($prefecture);
+
+            // 失敗したときの「0件」を長く残さない。APIが403や429を返すと、
+            // その県のページが次の更新まで空のままになってしまう。
+            Cache::put(
+                $cacheKey,
+                $results,
+                $succeeded ? now()->addHours(6) : now()->addMinutes(5)
+            );
+        }
 
         $tagsByCourseId = [];
         $availableTags = [];
