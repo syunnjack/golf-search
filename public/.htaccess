@@ -5,6 +5,16 @@
 
     RewriteEngine On
 
+    # http でも同じ内容が出ていたので、https へ寄せる。
+    # サイトマップも canonical も https を指しているのに、http が 200 を
+    # 返していた（2026-09-01 実測）。同じページが2つのURLで存在する状態だった。
+    #
+    # Xserver は SSL を手前で終端するため、%{HTTPS} だけだと判定を外すことがある。
+    # X-Forwarded-Proto も見て、どちらかで http と分かったら転送する。
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
