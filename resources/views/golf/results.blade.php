@@ -92,6 +92,67 @@
     </section>
   @endif
 
+  {{-- ゴルフ練習場（打ちっぱなし）。OpenStreetMap 由来の実データ。 --}}
+  @if(!empty($ranges['ranges']) || !empty($ranges['incomplete']))
+    <section class="mb-4 p-3 border rounded" aria-label="{{ $prefecture }}のゴルフ練習場">
+      <h2 class="h6 mb-2">{{ $prefecture }}のゴルフ練習場（打ちっぱなし）</h2>
+      @if(!empty($ranges['ranges']))
+        <p class="small text-muted mb-2">{{ count($ranges['ranges']) }}件を掲載しています。</p>
+        <ul class="list-unstyled mb-2">
+          @foreach($ranges['ranges'] as $range)
+            <li class="border-bottom py-2">
+              <span class="fw-bold">{{ $range['name'] }}</span>
+              @if(!empty($range['address']))
+                <span class="small text-muted ms-2">{{ $range['address'] }}</span>
+              @endif
+              @if(!empty($range['openingHours']))
+                <span class="small text-muted ms-2">{{ $range['openingHours'] }}</span>
+              @endif
+              <span class="small ms-2">
+                <a href="https://www.openstreetmap.org/{{ $range['id'] }}" target="_blank" rel="noopener noreferrer nofollow">地図</a>
+                @if(!empty($range['website']))
+                  ・<a href="{{ $range['website'] }}" target="_blank" rel="noopener noreferrer nofollow">公式サイト</a>
+                @endif
+              </span>
+            </li>
+          @endforeach
+        </ul>
+      @else
+        <p class="small mb-2">この県の練習場は、地図データにまだ登録がありません。</p>
+      @endif
+      <p class="text-muted small mb-0">
+        出典: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>（ODbL）。
+        {{ $ranges['confirmedOn'] }} 時点のデータです。
+        <strong>名前が登録されている施設だけを載せています。</strong>地図データに無い練習場は出ません。
+        営業時間・料金は変わることがあるため、行く前に各施設へご確認ください。
+      </p>
+    </section>
+  @endif
+
+  {{-- ゴルフ用品。楽天市場APIが有効になるまでは何も出ない。 --}}
+  @if(!empty($items))
+    <section class="mb-4 p-3 border rounded bg-light" aria-label="ゴルフ用品">
+      <h2 class="h6 mb-2">練習に使う道具<span class="badge bg-secondary ms-2 align-middle">広告</span></h2>
+      <div class="d-flex flex-wrap gap-3">
+        @foreach($items as $item)
+          <a href="{{ $item['url'] }}" target="_blank" rel="noopener noreferrer sponsored nofollow" class="text-decoration-none text-dark" style="width: 140px;">
+            @if(!empty($item['image']))
+              <img src="{{ $item['image'] }}" alt="" width="140" loading="lazy" class="rounded">
+            @endif
+            <div class="small fw-bold mt-1">{{ mb_strimwidth($item['name'], 0, 46, '…') }}</div>
+            @if(!empty($item['price']))
+              <div class="small text-muted">{{ number_format($item['price']) }}円</div>
+            @endif
+          </a>
+        @endforeach
+      </div>
+      <p class="text-muted small mb-0 mt-2">
+        提供: 楽天市場。当サイトは楽天アフィリエイトを利用しており、上のリンクから購入されると当サイトに紹介料が入ります。
+        価格・在庫は変動するため、最新の内容は販売ページでご確認ください。
+      </p>
+    </section>
+  @endif
+
   @if(!empty($hotels))
     <section class="mb-4 p-3 border rounded bg-light" aria-label="{{ $prefecture }}の前泊ホテル">
       <h2 class="h6 mb-2">早朝スタートの前泊に。{{ $prefecture }}周辺のホテル<span class="badge bg-secondary ms-2 align-middle">広告</span></h2>

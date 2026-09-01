@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Review;
 use App\Support\GolfTagger;
 use App\Support\JmaWeather;
+use App\Support\DrivingRanges;
+use App\Support\RakutenGolfItems;
 use App\Support\RakutenTravel;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
@@ -196,12 +198,15 @@ class GolfController extends Controller
             ->groupBy('course_id');
 
         $weather = JmaWeather::forecast($prefecture);
+        $ranges = DrivingRanges::forPrefecture($prefecture);
         $hotels = RakutenTravel::hotelsNear($prefecture);
+        // 練習場を見ている人にいちばん近い用品。楽天市場APIが未設定なら空で返る。
+        $items = RakutenGolfItems::search('ゴルフ 練習 器具');
         $faq = $this->buildFaq($prefecture, $reviews, $tagsByCourseId, $weather, $hotels);
 
         return view('golf.results', compact(
             'results', 'prefecture', 'prefectureSlug', 'reviews', 'tagsByCourseId',
-            'availableTags', 'tag', 'faq', 'weather', 'hotels'
+            'availableTags', 'tag', 'faq', 'weather', 'hotels', 'ranges', 'items'
         ));
     }
 
