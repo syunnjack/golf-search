@@ -8,6 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # **配置先は Secret にしない。** パスは秘密ではないうえ、Secret にすると
+      # ログで伏せ字になり、失敗したときに原因が読めない。
+      # 実際 XSERVER_DEPLOY_PATH に Windows のパスが入っていて、
+      # rsync が「Unexpected remote arg: ***@***:C:/Program」で落ちていた。
+      DEPLOY_PATH: /home/xs501620/golf-kuchikomi.jp/app
     steps:
       - uses: actions/checkout@v5
 
@@ -58,14 +64,14 @@ jobs:
           port: 10022
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: mkdir -p "${{ secrets.XSERVER_DEPLOY_PATH }}"
+          script: mkdir -p "${{ env.DEPLOY_PATH }}"
 
       - name: Deploy files via rsync over SSH
         uses: burnett01/rsync-deployments@7.0.1
         with:
           switches: -avzr --delete --exclude=".git" --exclude=".github" --exclude="node_modules" --exclude="tests" --exclude="database/database.sqlite" --exclude="storage/app" --exclude="storage/logs" --exclude="storage/framework"
           path: ./
-          remote_path: ${{ secrets.XSERVER_DEPLOY_PATH }}
+          remote_path: ${{ env.DEPLOY_PATH }}
           remote_host: ${{ secrets.SSH_HOST }}
           remote_port: '10022'
           remote_user: ${{ secrets.SSH_USERNAME }}
@@ -80,7 +86,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd "${{ secrets.XSERVER_DEPLOY_PATH }}"
+            cd "${{ env.DEPLOY_PATH }}"
             mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views storage/logs storage/app
             touch database/database.sqlite
             chmod -R 775 storage database
