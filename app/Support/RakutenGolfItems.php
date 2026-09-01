@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Http;
  *
  *   GORA    /engine/api/Gora/GoraGolfCourseSearch/20170623
  *   トラベル /engine/api/Travel/KeywordHotelSearch/20260731
- *   市場     /ichibams/api/IchibaItem/Search/20220601   ← これ
+ *   市場     /ichibams/api/IchibaItem/Search/20260701   ← これ
  *
  * app.rakuten.co.jp/services のほうを叩くと、このアプリIDでは通らない。
  *
@@ -31,7 +31,10 @@ use Illuminate\Support\Facades\Http;
  */
 class RakutenGolfItems
 {
-    private const ENDPOINT = 'https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601';
+    // **バージョンは 20260701。** 20220601 を叩くと
+    // 「API Configuration not found」が返り、鍵やアプリの問題に見えてしまう。
+    // 実際それで別アプリを作るところまで遠回りした（2026-09-01）。
+    private const ENDPOINT = 'https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701';
 
     /** 1つのキーワードで並べる数 */
     private const HITS = 6;
