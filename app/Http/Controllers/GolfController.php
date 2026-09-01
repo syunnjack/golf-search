@@ -70,9 +70,14 @@ class GolfController extends Controller
     /**
      * 楽天GORAから都道府県のゴルフ場を取る。
      *
-     * keyword検索はあいまい一致なので、県外のコースも混ざる。住所の先頭が
-     * 県名かどうかで絞り込むが、1ページ目が県外で埋まると0件になってしまう。
-     * そのため、結果が続くかぎりページを送って母数を増やす。
+     * **keyword 検索は使わない。** あいまい一致なので県外のコースが混ざり、
+     * 住所の先頭で絞ると1ページ目が県外で埋まった県は0件になっていた。
+     * 実際に神奈川・静岡・茨城など18県が「見つかりませんでした」の
+     * 145字ページになっていた（2026-09-01 実測）。
+     *
+     * GORA には areaCode があり、値は **JISの都道府県番号**（1=北海道 … 47=沖縄）。
+     * PREFECTURE_SLUGS はその順に並べてあるので、並び順から番号を作れる。
+     * 住所の先頭での絞り込みは、念のため残す。
      *
      * @return array{0: array<int, array<string, mixed>>, 1: bool} 結果と、APIが応答したか
      */
@@ -80,6 +85,14 @@ class GolfController extends Controller
     {
         $matches = [];
         $succeeded = false;
+
+        $index = array_search($prefecture, array_keys(self::PREFECTURE_SLUGS), true);
+
+        if ($index === false) {
+            return [[], false];
+        }
+
+        $areaCode = $index + 1;
 
         for ($page = 1; $page <= self::MAX_PAGES; $page++) {
             if ($page > 1) {
@@ -99,7 +112,7 @@ class GolfController extends Controller
                         'applicationId' => config('services.rakuten.app_id'),
                         'accessKey' => config('services.rakuten.access_key'),
                         'affiliateId' => config('services.rakuten.affiliate_id'),
-                        'keyword' => $prefecture . ' ゴルフ場',
+                        'areaCode' => $areaCode,
                         'hits' => self::HITS_PER_PAGE,
                         'page' => $page,
                     ]);
