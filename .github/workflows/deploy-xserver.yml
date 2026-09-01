@@ -53,6 +53,8 @@ jobs:
           RAKUTEN_APP_ID=${{ secrets.RAKUTEN_APP_ID }}
           RAKUTEN_ACCESS_KEY=${{ secrets.RAKUTEN_ACCESS_KEY }}
           RAKUTEN_AFFILIATE_ID=${{ secrets.RAKUTEN_AFFILIATE_ID }}
+          RAKUTEN_ICHIBA_APP_ID=${{ secrets.RAKUTEN_ICHIBA_APP_ID }}
+          RAKUTEN_ICHIBA_ACCESS_KEY=${{ secrets.RAKUTEN_ICHIBA_ACCESS_KEY }}
           EOF
 
       # 配置先が存在しないと rsync がそのまま失敗する（2026年8月まで、この理由で

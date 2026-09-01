@@ -44,6 +44,13 @@ return [
         'app_id' => env('RAKUTEN_APP_ID'),
         'access_key' => env('RAKUTEN_ACCESS_KEY'),
         'affiliate_id' => env('RAKUTEN_AFFILIATE_ID'),
+
+        // **楽天市場APIは別のアプリが要る。** 新しい楽天ウェブサービスは
+        // アプリを作るときに使うAPIが決まり、あとから足せない。
+        // GORA・トラベル用のアプリでは "API Configuration not found" が返る。
+        // 未設定のときは上の資格情報にそのまま落とす（設定するまで用品は出ない）。
+        'ichiba_app_id' => env('RAKUTEN_ICHIBA_APP_ID', env('RAKUTEN_APP_ID')),
+        'ichiba_access_key' => env('RAKUTEN_ICHIBA_ACCESS_KEY', env('RAKUTEN_ACCESS_KEY')),
     ],
 
 ];

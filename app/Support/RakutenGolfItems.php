@@ -47,8 +47,9 @@ class RakutenGolfItems
      */
     public static function search(string $keyword): array
     {
-        $appId = config('services.rakuten.app_id');
-        $accessKey = config('services.rakuten.access_key');
+        // 市場APIは別アプリの資格情報を使う（GORA用では通らない）
+        $appId = config('services.rakuten.ichiba_app_id');
+        $accessKey = config('services.rakuten.ichiba_access_key');
 
         if (! $appId || ! $accessKey) {
             return [];
