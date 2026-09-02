@@ -37,7 +37,17 @@ class RakutenTravel
         // 語を並べるほど当たらなくなる。地区コードで先に絞る。
         $area = RakutenTravelAreas::forPrefecture($prefecture);
 
-        return Cache::remember("rakuten-travel:{$prefecture}", now()->addHour(), function () use ($prefecture, $appId, $accessKey, $area) {
+        // **失敗を1時間焼き付けない。** 連続で叩くと 403 が返り、
+        // Cache::remember だと「0件」がそのまま1時間残る（沖縄で実際に起きた）。
+        // 取れたときだけ長く持つ。
+        $key = "rakuten-travel:{$prefecture}";
+        $cached = Cache::get($key);
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $hotels = (function () use ($prefecture, $appId, $accessKey, $area) {
             try {
                 $response = Http::timeout(5)
                     ->withHeaders([
@@ -58,11 +68,11 @@ class RakutenTravel
                             'responseType' => 'small',
                         ]));
             } catch (ConnectionException) {
-                return [];
+                return null;
             }
 
             if (! $response->successful()) {
-                return [];
+                return null;
             }
 
             $hotelGroups = $response->json('hotels') ?? [];
@@ -85,6 +95,13 @@ class RakutenTravel
             }
 
             return $hotels;
-        });
+        })();
+
+        // 取れたときは1時間、取れなかったときは5分。
+        // 403 で空になったものを長く抱えると、その県のホテル欄が
+        // 次の更新まで消えたままになる。
+        Cache::put($key, $hotels ?? [], $hotels === null ? now()->addMinutes(5) : now()->addHour());
+
+        return $hotels ?? [];
     }
 }
