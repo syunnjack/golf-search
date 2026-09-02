@@ -32,22 +32,31 @@ class RakutenTravel
             return [];
         }
 
-        return Cache::remember("rakuten-travel:{$prefecture}", now()->addHour(), function () use ($prefecture, $appId, $accessKey) {
+        // **キーワードだけでは県が埋まらない。**「埼玉県 ゴルフ場 前泊」で
+        // 引くと 0件だった（2026-09-02 実測）。あいまい一致なので、
+        // 語を並べるほど当たらなくなる。地区コードで先に絞る。
+        $area = RakutenTravelAreas::forPrefecture($prefecture);
+
+        return Cache::remember("rakuten-travel:{$prefecture}", now()->addHour(), function () use ($prefecture, $appId, $accessKey, $area) {
             try {
                 $response = Http::timeout(5)
                     ->withHeaders([
                         'Referer' => config('app.url'),
                         'Origin' => config('app.url'),
                     ])
-                    ->get('https://openapi.rakuten.co.jp/engine/api/Travel/KeywordHotelSearch/20260731', [
-                        'format' => 'json',
-                        'applicationId' => $appId,
-                        'accessKey' => $accessKey,
-                        'affiliateId' => config('services.rakuten.affiliate_id'),
-                        'keyword' => $prefecture . ' ゴルフ場 前泊',
-                        'hits' => 6,
-                        'responseType' => 'small',
-                    ]);
+                    ->get('https://openapi.rakuten.co.jp/engine/api/Travel/KeywordHotelSearch/20260731',
+                        array_filter([
+                            'format' => 'json',
+                            'applicationId' => $appId,
+                            'accessKey' => $accessKey,
+                            'affiliateId' => config('services.rakuten.affiliate_id'),
+                            // 語は絞りすぎない。地区コードで県は確定している
+                            'keyword' => 'ゴルフ',
+                            'largeClassCode' => $area['largeClassCode'] ?? null,
+                            'middleClassCode' => $area['middleClassCode'] ?? null,
+                            'hits' => 6,
+                            'responseType' => 'small',
+                        ]));
             } catch (ConnectionException) {
                 return [];
             }
